@@ -20,64 +20,64 @@ app.use(cors());
 
 // Database connection
 mongoose
-  .connect(process.env.MONGO_URL)
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((err) => {
-    console.error("Failed to connect to MongoDB", err);
-  });
+     .connect(process.env.MONGO_URL)
+     .then(() => {
+          console.log("Connected to MongoDB");
+     })
+     .catch((err) => {
+          console.error("Failed to connect to MongoDB", err);
+     });
 
 // Middleware
-app.use("/images", express.static(path.join(__dirname, "public/images"))); // Serve static files from 'public/images'
+app.use("/images", express.static(path.join(__dirname, "public", "images"))); // Serve static files from 'public/images'
 app.use(express.json()); // Parse JSON bodies
 app.use(helmet()); // Security middleware
 app.use(morgan("common")); // HTTP request logger
 
 // Multer configuration
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/images"); // Set destination folder for uploads
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + path.extname(file.originalname); // Append timestamp to original filename
-    cb(null, file.fieldname + "-" + uniqueSuffix); // Set file name
-  },
+     destination: (req, file, cb) => {
+          cb(null, "public/images"); // Set destination folder for uploads
+     },
+     filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + path.extname(file.originalname); // Append timestamp to original filename
+          cb(null, file.fieldname + "-" + uniqueSuffix); // Set file name
+     },
 });
 
 const upload = multer({
-  storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // Set file size limit (e.g., 2MB)
-  fileFilter: (req, file, cb) => {
-    // Accept images only (optional)
-    const filetypes = /jpeg|jpg|png|gif/;
-    const extname = filetypes.test(
-      path.extname(file.originalname).toLowerCase()
-    );
-    const mimetype = filetypes.test(file.mimetype);
+     storage: storage,
+     limits: { fileSize: 2 * 1024 * 1024 }, // Set file size limit (e.g., 2MB)
+     fileFilter: (req, file, cb) => {
+          // Accept images only (optional)
+          const filetypes = /jpeg|jpg|png|gif/;
+          const extname = filetypes.test(
+               path.extname(file.originalname).toLowerCase()
+          );
+          const mimetype = filetypes.test(file.mimetype);
 
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error("Only images are allowed!"));
-    }
-  },
+          if (mimetype && extname) {
+               return cb(null, true);
+          } else {
+               cb(new Error("Only images are allowed!"));
+          }
+     },
 });
 
 // Route to handle file upload
 app.post("/api/upload", upload.single("file"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
+     if (!req.file) {
+          return res.status(400).json({ message: "No file uploaded" });
+     }
 
-  try {
-    return res.status(200).json({
-      message: "File uploaded successfully",
-      filePath: `/images/${req.file.filename}`,
-    });
-  } catch (err) {
-    res.status(500).json({ message: "File upload failed", error: err.message });
-  }
+     try {
+          return res.status(200).json({
+               message: "File uploaded successfully",
+               filePath: `/images/${req.file.filename}`,
+          });
+     } catch (err) {
+          res.status(500).json({ message: "File upload failed", error: err.message });
+     }
 });
 
 // Routes
@@ -89,5 +89,5 @@ app.use("/api/posts", postRoute);
 
 // Start the server
 app.listen(8800, () => {
-  console.log("Backend server is running on port 8800!");
+     console.log("Backend server is running on port 8800!");
 });
